@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Registro de Lecturas Eléctricas Mensuales</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+    <header>
+        <h1>Registro de Lecturas Eléctricas</h1>
+        <p>Tarifa unitaria utilizada: 180 $/kWh (ejemplo)</p>
+    </header>
+
+    <main id="app">
+        <h2>Ingreso y Cálculo de Consumo Mensual</h2>
+
+        <div class="form-container" id="formSection">
+            <label for="clienteSelect">Seleccione Cliente:</label>
+            <select id="clienteSelect"></select>
+
+            <label for="lecturaInput">Lectura Mes Actual:</label>
+            <input type="number" id="lecturaInput" placeholder="Ingrese Lectura Actual (kWh)" />
+
+            <button id="calcularBtn">Calcular Consumo</button>
+        </div>
+
+        <div id="resultado" class="resultado-calculo" aria-live="polite"></div>
+
+        <h2>Base de Datos Actual</h2>
+        <table id="lecturasTable" aria-describedby="tabla-lecturas">
+            <thead>
+                <tr>
+                    <th>Cliente</th>
+                    <th>Lectura Mes Anterior (kWh)</th>
+                    <th>Lectura Mes Actual (kWh)</th>
+                    <th>Consumo (kWh)</th>
+                    <th>Subtotal ($)</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </main>
+
+<script src="script.js"></script>
+</body>
+</html>
