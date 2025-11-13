@@ -3,7 +3,7 @@
 // ===========================
 const REQUIRE_PASSWORD = true;
 const PASSWORD = "energia2025";
-const maxVisitas = 20;
+const maxVisitas = 2;
 const periodoDias = 30; 
 const TARIFA_UNITARIA_INICIAL = 180; 
 
