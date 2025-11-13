@@ -1,67 +1,63 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <!-- 🔌 Título personalizado -->
-  <title>⚡ Medidor Eléctrico — Control de Consumo Mensual</title>
-
-  <!-- 🎨 Favicon -->
-  <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/2910/2910768.png" type="image/png">
-
-  <!-- 🔹 Descripción -->
-  <meta name="description" content="Sistema de registro y cálculo de lecturas eléctricas mensuales. Proyecto público desarrollado por Marcsene.">
-  <meta name="keywords" content="electricidad, consumo, medidor, kWh, energía, formulario, cálculo mensual">
-
-  <!-- 📱 Color del tema -->
-  <meta name="theme-color" content="#007bff">
-
-  <!-- 🎨 Hoja de estilos -->
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Lecturas Eléctricas Mensuales</title>
+    <link rel="stylesheet" href="style.css"> 
 </head>
 <body>
 
-  <header>
-    <h1>Registro de Lecturas Eléctricas</h1>
-    <p>Tarifa unitaria utilizada: 180 $/kWh (ejemplo)</p>
-  </header>
+    <header>
+        <h1>Registro de Lecturas Eléctricas</h1>
+        <p>Calculadora de Consumo con Tarifa Variable y Gasto Fijo</p>
+    </header>
 
-  <main id="app">
-    <!-- Aviso visual -->
-    <div class="aviso-limite">
-      ⚠️ Este sistema permite solo <strong>2 accesos mensuales</strong> por navegador.
-    </div>
+    <main>
+        
+        <h2>Configuración de Tarifas</h2>
+        <div class="form-container" id="config-tarifas">
+            <label for="tarifaInput">Tarifa Unitaria ($/kWh):</label>
+            <input type="number" id="tarifaInput" value="180" min="0" step="any">
+            
+            <label for="gastoFijoInput">Gasto Fijo Mensual ($):</label>
+            <input type="number" id="gastoFijoInput" value="2500" min="0">
+            
+            <button onclick="recalcularTodo()">Aplicar Tarifas y Recalcular</button>
+        </div>
+        
+        <h2>Ingreso y Cálculo de Consumo Mensual</h2>
+        
+        <div class="form-container">
+            <label for="clienteSelect">Seleccione Cliente:</label>
+            <select id="clienteSelect">
+                </select>
+            
+            <label for="lecturaInput">Lectura Mes Actual (kWh):</label>
+            <input type="number" id="lecturaInput" placeholder="Ingrese Lectura Actual (kWh)" min="0" step="any">
+            
+            <button onclick="calcularConsumo()">Calcular Consumo</button>
+        </div>
 
-    <h2>Ingreso y Cálculo de Consumo Mensual</h2>
+        <div id="resultado" class="resultado-calculo">
+            </div>
 
-    <div class="form-container" id="formSection">
-      <label for="clienteSelect">Seleccione Cliente:</label>
-      <select id="clienteSelect"></select>
+        <h2>Base de Datos Actual</h2>
+        <table id="lecturasTable">
+            <thead>
+                <tr>
+                    <th>Cliente</th>
+                    <th>Lectura Mes Anterior (kWh)</th> 
+                    <th>Lectura Mes Actual (kWh)</th>
+                    <th>Consumo (kWh)</th>
+                    <th>Total a Pagar ($)</th>
+                </tr>
+            </thead>
+            <tbody>
+                </tbody>
+        </table>
+    </main>
 
-      <label for="lecturaInput">Lectura Mes Actual:</label>
-      <input type="number" id="lecturaInput" placeholder="Ingrese Lectura Actual (kWh)" />
-
-      <button id="calcularBtn">Calcular Consumo</button>
-    </div>
-
-    <div id="resultado" class="resultado-calculo" aria-live="polite"></div>
-
-    <h2>Base de Datos Actual</h2>
-    <table id="lecturasTable" aria-describedby="tabla-lecturas">
-      <thead>
-        <tr>
-          <th>Cliente</th>
-          <th>Lectura Mes Anterior (kWh)</th>
-          <th>Lectura Mes Actual (kWh)</th>
-          <th>Consumo (kWh)</th>
-          <th>Subtotal ($)</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </main>
-
-  <script src="script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
