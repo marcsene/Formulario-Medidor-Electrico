@@ -131,3 +131,18 @@ tr:hover {
     margin-bottom: 20px;
     font-weight: bold;
 }
+/* Estilo para la fila del Total General */
+.total-row td {
+    /* Fondo para destacar (similar al amarillo de tu Excel) */
+    background-color: #f7e69f !important; 
+    /* Borde superior para separarlo visualmente de la última fila de cliente */
+    border-top: 4px solid #333; 
+    /* Aumentar la fuente para que sea más legible */
+    font-weight: bold;
+}
+
+/* Estilo específico para el monto final del total (Total a Pagar) */
+.total-row td:last-child {
+    font-size: 1.1em;
+    color: #000;
+}

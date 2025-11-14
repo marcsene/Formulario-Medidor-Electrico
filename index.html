@@ -16,11 +16,18 @@
 
     <div id="login-container" class="form-container" style="max-width: 400px; margin: 50px auto;">
         <h2>🔐 Inicio de Sesión</h2>
-        <label for="usernameInput">Nombre Completo:</label>
-        <input type="text" id="usernameInput" placeholder="Ej: Ines Fuentes" required>
         
-        <label for="passwordInput">Contraseña (Nombre de Pila + Número):</label>
-        <input type="password" id="passwordInput" placeholder="Ej: Ines2025" required>
+        <label for="roleSelect">Seleccione su Rol:</label>
+        <select id="roleSelect">
+            <option value="cliente">Cliente</option>
+            <option value="admin">Administrador</option>
+        </select>
+        
+        <label for="usernameInput">Nombre Completo:</label>
+        <input type="text" id="usernameInput" placeholder="Ej: Ines Fuentes (Cliente) o Admin (Admin)" required>
+        
+        <label for="passwordInput">Contraseña:</label>
+        <input type="password" id="passwordInput" placeholder="Contraseña" required>
         
         <button onclick="iniciarSesion()">Ingresar</button>
         <p id="loginMessage" style="color: red; margin-top: 10px;"></p>

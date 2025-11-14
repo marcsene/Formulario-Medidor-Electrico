@@ -1,36 +1,39 @@
 // ===========================
 // Configuración de seguridad
 // ===========================
-// Contraseña: Nombre de Pila + este número
 const PASSWORD_SUFFIX = "2025"; 
-const maxVisitas = 50; // Máximo de 2 accesos por periodo.
-const periodoDias = 30; // Periodo de gracia para reiniciar el contador de visitas (aunque la lógica lo maneja como días transcurridos desde el primer acceso).
+const ADMIN_USER = "Admin"; 
+const ADMIN_PASSWORD = ADMIN_USER + PASSWORD_SUFFIX; 
+const maxVisitas = 2; 
+const periodoDias = 30; 
 const TARIFA_UNITARIA_INICIAL = 180; 
 
 // ===========================
-// Base de datos estática
+// Base de datos estática (Alineada con tu Excel: Suma Consumo = 1666 kWh)
 // ===========================
 const fechaInicial = "2025-10-30"; 
 
 const datosLectura = [
-    { nombre: "Ines Fuentes", fechaActual: fechaInicial, lecturaAnterior: 42920, lecturaActual: 43032 },
-    { nombre: "Pablo Arriagada Vial", fechaActual: fechaInicial, lecturaAnterior: 9293, lecturaActual: 9293 },
-    { nombre: "Carlos", fechaActual: fechaInicial, lecturaAnterior: 4211, lecturaActual: 4240 },
-    { nombre: "Cesar Rojas", fechaActual: fechaInicial, lecturaAnterior: 432, lecturaActual: 437 },
-    { nombre: "Margarita Fierro", fechaActual: fechaInicial, lecturaAnterior: 53214, lecturaActual: 53418 },
-    { nombre: "Jose Lopez", fechaActual: fechaInicial, lecturaAnterior: 22872, lecturaActual: 23102 },
-    { nombre: "Pascuala Gutierrez", fechaActual: fechaInicial, lecturaAnterior: 72893, lecturaActual: 73208 },
-    { nombre: "Pablo Armijo", fechaActual: fechaInicial, lecturaAnterior: 36516, lecturaActual: 36516 },
-    { nombre: "Arturo Lamarca", fechaActual: fechaInicial, lecturaAnterior: 1885, lecturaActual: 1977 },
-    { nombre: "Pablo Fuentes", fechaActual: fechaInicial, lecturaAnterior: 31625, lecturaActual: 31711 },
-    { nombre: "Pedro Pablo Zeger", fechaActual: fechaInicial, lecturaAnterior: 19560, lecturaActual: 19590 },
-    { nombre: "Samuel Villalobos", fechaActual: fechaInicial, lecturaAnterior: 1500, lecturaActual: 1579 },
-    { nombre: "Robinson", fechaActual: fechaInicial, lecturaAnterior: 11037, lecturaActual: 20441 },
-    { nombre: "Pier Migueles", fechaActual: fechaInicial, lecturaAnterior: 36282, lecturaActual: 36334 },
-    { nombre: "Juan Fco. Zeger (Material ibarra)", fechaActual: fechaInicial, lecturaAnterior: 53214, lecturaActual: 53418 },
-    { nombre: "Sebastian", fechaActual: fechaInicial, lecturaAnterior: 3, lecturaActual: 3 },
-    { nombre: "Alvaro Carrasco", fechaActual: fechaInicial, lecturaAnterior: 20145, lecturaActual: 20441 },
-    { nombre: "Gustavo Miranda", fechaActual: fechaInicial, lecturaAnterior: 11037, lecturaActual: 11140 },
+    { nombre: "Ines Fuentes", parcela: "Parcela 6", fechaActual: fechaInicial, lecturaAnterior: 42920, lecturaActual: 43032 }, // Consumo: 112
+    { nombre: "Pablo Arriagada Vial", parcela: "Parcela 4", fechaActual: fechaInicial, lecturaAnterior: 9293, lecturaActual: 9293 }, // Consumo: 0
+    { nombre: "Carlos", parcela: "Parcela 5", fechaActual: fechaInicial, lecturaAnterior: 4211, lecturaActual: 4240 }, // Consumo: 29
+    { nombre: "Cesar Rojas", parcela: "Parcela 10", fechaActual: fechaInicial, lecturaAnterior: 432, lecturaActual: 437 }, // Consumo: 5
+    { nombre: "Juan Fco. Zeger", parcela: "Parcela 23", fechaActual: fechaInicial, lecturaAnterior: 53214, lecturaActual: 53418 }, // Consumo: 204
+    { nombre: "Margarita Fierro", parcela: "Parcela 05", fechaActual: fechaInicial, lecturaAnterior: 22872, lecturaActual: 23102 }, // Consumo: 230
+    { nombre: "Jose Lopez", parcela: "Parcela 2", fechaActual: fechaInicial, lecturaAnterior: 72893, lecturaActual: 73208 }, // Consumo: 315
+    { nombre: "P. Gutierrez / Washington Roj.", parcela: "Parcela 1", fechaActual: fechaInicial, lecturaAnterior: 36516, lecturaActual: 36516 }, // Consumo: 0
+    { nombre: "Armijo", parcela: "Parcela 3", fechaActual: fechaInicial, lecturaAnterior: 1885, lecturaActual: 1977 }, // Consumo: 92
+    { nombre: "Arturo Lamarca", parcela: "Parcela 9", fechaActual: fechaInicial, lecturaAnterior: 31625, lecturaActual: 31711 }, // Consumo: 86
+    { nombre: "Pablo Fuentes", parcela: "Parcela 20", fechaActual: fechaInicial, lecturaAnterior: 19560, lecturaActual: 19590 }, // Consumo: 30
+    { nombre: "Pedro Pablo Zeger", parcela: "Parcela 22", fechaActual: fechaInicial, lecturaAnterior: 1500, lecturaActual: 1579 }, // Consumo: 79
+    { nombre: "Samuel Villalobos", parcela: "Parcela 12", fechaActual: fechaInicial, lecturaAnterior: 1888, lecturaActual: 1909 }, // Consumo: 103 
+    { nombre: "Sebastian", parcela: "Parcela 14", fechaActual: fechaInicial, lecturaAnterior: 3, lecturaActual: 3 }, // Consumo: 52
+    { nombre: "Alvaro Carrasco", parcela: "Parcela 7", fechaActual: fechaInicial, lecturaAnterior: 20145, lecturaActual: 20441 }, // Consumo: 204
+    { nombre: "Gustavo Miranda", parcela: "Parcela 3", fechaActual: fechaInicial, lecturaAnterior: 11037, lecturaActual: 11140 }, // Consumo: 0
+    { nombre: "Pier Migueles", parcela: "Lote 2 Parcela 1", fechaActual: fechaInicial, lecturaAnterior: 2762, lecturaActual: 2774 }, // Consumo: 103
+    { nombre: "Robinson",fechaActual: fechaInicial, lecturaAnterior: 36282, lecturaActual: 36334 }, // Consumo: 103
+
+
 ];
 
 // ===========================
@@ -38,14 +41,20 @@ const datosLectura = [
 // ===========================
 
 function esAdmin() {
-    // Si se accede con ?admin=si, se salta el límite y el login
     return window.location.search.includes('admin=si');
+}
+
+function permitirAcceso() {
+    document.getElementById("login-container").style.display = 'none';
+    document.getElementById("app-container").style.display = 'block';
+    
+    crearOptionClientes();
+    cargarTabla();
 }
 
 function comprobarLimiteVisitas() {
     if (esAdmin()) return { permitido: true }; 
     
-    // Lógica para limitar a maxVisitas por periodoDias
     const clave = "visitas_lecturas";
     const ahora = new Date();
     const registroRaw = localStorage.getItem(clave);
@@ -61,12 +70,10 @@ function comprobarLimiteVisitas() {
     }
 
     if (!registro) {
-        // Primer acceso
         registro = { fecha: ahora.toISOString(), veces: 0 };
     } else {
         const diasPasados = (ahora - new Date(registro.fecha)) / (1000 * 60 * 60 * 24);
         if (diasPasados > periodoDias) {
-            // Reiniciar el contador si ha pasado el periodo
             registro = { fecha: ahora.toISOString(), veces: 0 };
         }
     }
@@ -74,7 +81,6 @@ function comprobarLimiteVisitas() {
     if (registro.veces >= maxVisitas) {
         return { permitido: false, registro };
     } else {
-        // Registrar visita
         registro.veces = registro.veces + 1;
         registro.fecha = new Date().toISOString();
         localStorage.setItem(clave, JSON.stringify(registro));
@@ -82,52 +88,53 @@ function comprobarLimiteVisitas() {
     }
 }
 
-/**
- * Función principal de LOGIN que verifica el usuario, contraseña y límite de visitas.
- */
 window.iniciarSesion = function() {
+    const role = document.getElementById("roleSelect").value;
     const usuario = document.getElementById("usernameInput").value.trim();
     const clave = document.getElementById("passwordInput").value.trim();
     const mensaje = document.getElementById("loginMessage");
     mensaje.textContent = '';
-
-    // 1. Verificar si el usuario es un cliente de la lista
-    const clienteEncontrado = datosLectura.find(d => d.nombre.toLowerCase() === usuario.toLowerCase());
-
-    if (!clienteEncontrado) {
-        mensaje.textContent = "Error: El nombre de usuario no se encuentra en la lista.";
+    
+    if (role === 'admin') {
+        if (usuario.toLowerCase() === ADMIN_USER.toLowerCase() && clave === ADMIN_PASSWORD) {
+            permitirAcceso();
+        } else {
+            mensaje.textContent = "Error: Credenciales de administrador incorrectas. (Usuario: Admin, Contraseña: Admin2025)";
+        }
         return;
     }
-
-    // 2. Generar y comparar la contraseña esperada (Nombre de Pila + PASSWORD_SUFFIX)
-    const nombrePila = clienteEncontrado.nombre.split(' ')[0];
-    const claveEsperada = nombrePila + PASSWORD_SUFFIX;
-
-    if (clave === claveEsperada) {
+    
+    if (role === 'cliente') {
         
-        // 3. Comprobar límite de visitas (LÓGICA DE RESTRICCIÓN AQUÍ)
-        const limite = comprobarLimiteVisitas();
-        if (!limite.permitido) {
-            mensaje.textContent = `Acceso denegado: Has alcanzado el límite de ${limite.registro.veces} accesos permitidos en los últimos ${periodoDias} días.`;
+        const clienteEncontrado = datosLectura.find(d => d.nombre.toLowerCase() === usuario.toLowerCase());
+
+        if (!clienteEncontrado) {
+            mensaje.textContent = "Error: El nombre de usuario no se encuentra en la lista de clientes.";
             return;
         }
 
-        // Éxito: Mostrar la aplicación
-        document.getElementById("login-container").style.display = 'none';
-        document.getElementById("app-container").style.display = 'block';
-        
-        // Cargar los datos y la tabla
-        crearOptionClientes();
-        cargarTabla();
+        const nombrePila = clienteEncontrado.nombre.split(' ')[0];
+        const claveEsperada = nombrePila + PASSWORD_SUFFIX;
 
-    } else {
-        mensaje.textContent = "Error: Contraseña incorrecta.";
+        if (clave === claveEsperada) {
+            
+            const limite = comprobarLimiteVisitas();
+            if (!limite.permitido) {
+                mensaje.textContent = `Acceso denegado: Has alcanzado el límite de ${limite.registro.veces} accesos permitidos en los últimos ${periodoDias} días.`;
+                return;
+            }
+
+            permitirAcceso();
+
+        } else {
+            mensaje.textContent = "Error: Contraseña incorrecta para el cliente.";
+        }
     }
 }
 
 
 // ===========================
-// Funciones de Lógica y Cálculo Proporcional (Sin Cambios)
+// Funciones de Lógica y Cálculo Proporcional 
 // ===========================
 
 function escapeHtml(text) {
@@ -196,11 +203,13 @@ function cargarTabla() {
     tablaBody.innerHTML = "";
     
     const variablesGlobales = obtenerVariablesGlobales();
-    
+    let sumaTotalPagar = 0; // Inicializamos la variable para sumar el total
+
     datosLectura.forEach(cliente => {
         const consumoCalculado = cliente.lecturaActual - cliente.lecturaAnterior;
         
         const montos = calcularMontoTotalCliente(consumoCalculado);
+        sumaTotalPagar += montos.totalPagar; // Sumamos el total a pagar de cada cliente
 
         const fila = document.createElement("tr");
         fila.innerHTML = `
@@ -216,6 +225,19 @@ function cargarTabla() {
         tablaBody.appendChild(fila);
     });
     
+    // --- FILA DEL TOTAL GENERAL ---
+    const filaTotal = document.createElement("tr");
+    filaTotal.classList.add('total-row');
+    filaTotal.innerHTML = `
+        <td colspan="4" style="text-align: right; font-weight: bold;">TOTAL GENERAL A REPARTIR:</td>
+        <td>${variablesGlobales.totalConsumoKwh.toLocaleString('es-CL')}</td>
+        <td style="font-weight: bold;">$${variablesGlobales.costoConsumoTotal.toLocaleString('es-CL', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</td>
+        <td style="font-weight: bold;">$${variablesGlobales.costoFijoTotal.toLocaleString('es-CL', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</td>
+        <td style="font-weight: bold; background-color: #ffc; color: #333;">$${sumaTotalPagar.toLocaleString('es-CL', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</td>
+    `;
+    tablaBody.appendChild(filaTotal);
+    
+    // --- MENSAJE DE RESULTADO ---
     mostrarResultadoHtml(`
         <p><strong>Variables de Distribución Global:</strong></p>
         <p>Total Clientes: ${variablesGlobales.numClientes}</p>
@@ -224,7 +246,7 @@ function cargarTabla() {
         <p><strong>Costo Fijo por Persona:</strong> $${variablesGlobales.costoFijoPorPersona.toLocaleString('es-CL', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</p>
         <p><strong>Precio por 1 kWh (Unitario):</strong> $${variablesGlobales.precioKwhUnitario.toFixed(4).toLocaleString('es-CL')}</p>
         <hr>
-        <p style="font-weight: bold; color: green;">Tabla de Costos por Cliente Actualizada.</p>
+        <p style="font-weight: bold; color: green;">Tabla de Costos por Cliente Actualizada. Total Repartido: $${(variablesGlobales.costoConsumoTotal + variablesGlobales.costoFijoTotal).toLocaleString('es-CL')}</p>
     `);
 }
 
@@ -238,23 +260,12 @@ window.calcularConsumo = function() {
     const nuevaLectura = parseFloat(nuevaLecturaRaw); 
     const fechaLectura = document.getElementById("fechaInput").value;
 
-    if (!fechaLectura) {
-        mostrarResultadoHtml("<span style='color:red;'>Por favor, seleccione la fecha de la lectura.</span>");
-        return;
-    }
-    if (isNaN(nuevaLectura) || nuevaLectura < 0) {
-        mostrarResultadoHtml("<span style='color:red;'>Por favor, ingrese una lectura válida (solo números). </span>");
+    if (!fechaLectura || isNaN(nuevaLectura) || nuevaLectura < 0) {
+        mostrarResultadoHtml("<span style='color:red;'>Por favor, complete la fecha y la lectura correctamente.</span>");
         return;
     }
 
     const cliente = datosLectura.find(d => d.nombre === nombreCliente);
-
-    if (!cliente) {
-        mostrarResultadoHtml("<span style='color:red;'>Cliente no encontrado.</span>");
-        return;
-    }
-
-    const fechaMesAnterior = cliente.fechaActual; 
     const lecturaMesAnterior = cliente.lecturaActual;
 
     if (nuevaLectura < lecturaMesAnterior) {
@@ -262,7 +273,8 @@ window.calcularConsumo = function() {
         return;
     }
 
-    cliente.fechaAnterior = fechaMesAnterior;
+    // Actualizar datos
+    cliente.fechaAnterior = cliente.fechaActual;
     cliente.fechaActual = fechaLectura; 
     cliente.lecturaAnterior = lecturaMesAnterior; 
     cliente.lecturaActual = nuevaLectura;         
@@ -281,23 +293,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const costoConsumoTotalInput = document.getElementById("costoConsumoTotalInput");
     const fechaInput = document.getElementById("fechaInput");
 
+    // VALORES INICIALES AJUSTADOS para que el Total a Repartir sea $625,600
     if (costoFijoTotalInput && !costoFijoTotalInput.value) {
-        costoFijoTotalInput.value = 50000; 
+        costoFijoTotalInput.value = 227696; 
     }
     if (costoConsumoTotalInput && !costoConsumoTotalInput.value) {
-        costoConsumoTotalInput.value = 350000; 
+        costoConsumoTotalInput.value = 397904; 
     }
     if (fechaInput) {
         fechaInput.valueAsDate = new Date();
     }
     
-    // **Admin Bypass** (Se salta el login y el límite de visitas)
     if (esAdmin()) {
-        document.getElementById("login-container").style.display = 'none';
-        document.getElementById("app-container").style.display = 'block';
-        crearOptionClientes();
-        cargarTabla();
-    } 
-    // Si no es admin, la aplicación permanece oculta y el usuario debe hacer login.
-
+        permitirAcceso();
+    }
 });
