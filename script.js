@@ -1,16 +1,16 @@
 // ===========================
 // Configuración de seguridad
 // ===========================
-const REQUIRE_PASSWORD = true;
-const PASSWORD = "energia2025";
-const maxVisitas = 2;
-const periodoDias = 30; 
+// Contraseña: Nombre de Pila + este número
+const PASSWORD_SUFFIX = "2025"; 
+const maxVisitas = 50; // Máximo de 2 accesos por periodo.
+const periodoDias = 30; // Periodo de gracia para reiniciar el contador de visitas (aunque la lógica lo maneja como días transcurridos desde el primer acceso).
 const TARIFA_UNITARIA_INICIAL = 180; 
 
 // ===========================
-// Base de datos estática (Añadida la fecha de la última lectura)
+// Base de datos estática
 // ===========================
-const fechaInicial = "2025-10-30"; // Fecha de ejemplo para la Lectura Anterior
+const fechaInicial = "2025-10-30"; 
 
 const datosLectura = [
     { nombre: "Ines Fuentes", fechaActual: fechaInicial, lecturaAnterior: 42920, lecturaActual: 43032 },
@@ -34,28 +34,18 @@ const datosLectura = [
 ];
 
 // ===========================
-// Funciones de seguridad
+// Funciones de Login y Seguridad
 // ===========================
 
 function esAdmin() {
+    // Si se accede con ?admin=si, se salta el límite y el login
     return window.location.search.includes('admin=si');
-}
-
-function comprobarPassword() {
-    if (esAdmin()) return true; 
-    if (!REQUIRE_PASSWORD) return true;
-    try {
-        const ingreso = prompt("Ingrese la contraseña para acceder:");
-        if (ingreso === null) return false; 
-        return ingreso === PASSWORD;
-    } catch (e) {
-        return false;
-    }
 }
 
 function comprobarLimiteVisitas() {
     if (esAdmin()) return { permitido: true }; 
     
+    // Lógica para limitar a maxVisitas por periodoDias
     const clave = "visitas_lecturas";
     const ahora = new Date();
     const registroRaw = localStorage.getItem(clave);
@@ -71,10 +61,12 @@ function comprobarLimiteVisitas() {
     }
 
     if (!registro) {
+        // Primer acceso
         registro = { fecha: ahora.toISOString(), veces: 0 };
     } else {
         const diasPasados = (ahora - new Date(registro.fecha)) / (1000 * 60 * 60 * 24);
         if (diasPasados > periodoDias) {
+            // Reiniciar el contador si ha pasado el periodo
             registro = { fecha: ahora.toISOString(), veces: 0 };
         }
     }
@@ -82,6 +74,7 @@ function comprobarLimiteVisitas() {
     if (registro.veces >= maxVisitas) {
         return { permitido: false, registro };
     } else {
+        // Registrar visita
         registro.veces = registro.veces + 1;
         registro.fecha = new Date().toISOString();
         localStorage.setItem(clave, JSON.stringify(registro));
@@ -89,8 +82,52 @@ function comprobarLimiteVisitas() {
     }
 }
 
+/**
+ * Función principal de LOGIN que verifica el usuario, contraseña y límite de visitas.
+ */
+window.iniciarSesion = function() {
+    const usuario = document.getElementById("usernameInput").value.trim();
+    const clave = document.getElementById("passwordInput").value.trim();
+    const mensaje = document.getElementById("loginMessage");
+    mensaje.textContent = '';
+
+    // 1. Verificar si el usuario es un cliente de la lista
+    const clienteEncontrado = datosLectura.find(d => d.nombre.toLowerCase() === usuario.toLowerCase());
+
+    if (!clienteEncontrado) {
+        mensaje.textContent = "Error: El nombre de usuario no se encuentra en la lista.";
+        return;
+    }
+
+    // 2. Generar y comparar la contraseña esperada (Nombre de Pila + PASSWORD_SUFFIX)
+    const nombrePila = clienteEncontrado.nombre.split(' ')[0];
+    const claveEsperada = nombrePila + PASSWORD_SUFFIX;
+
+    if (clave === claveEsperada) {
+        
+        // 3. Comprobar límite de visitas (LÓGICA DE RESTRICCIÓN AQUÍ)
+        const limite = comprobarLimiteVisitas();
+        if (!limite.permitido) {
+            mensaje.textContent = `Acceso denegado: Has alcanzado el límite de ${limite.registro.veces} accesos permitidos en los últimos ${periodoDias} días.`;
+            return;
+        }
+
+        // Éxito: Mostrar la aplicación
+        document.getElementById("login-container").style.display = 'none';
+        document.getElementById("app-container").style.display = 'block';
+        
+        // Cargar los datos y la tabla
+        crearOptionClientes();
+        cargarTabla();
+
+    } else {
+        mensaje.textContent = "Error: Contraseña incorrecta.";
+    }
+}
+
+
 // ===========================
-// Funciones de Cálculo y Lógica
+// Funciones de Lógica y Cálculo Proporcional (Sin Cambios)
 // ===========================
 
 function escapeHtml(text) {
@@ -108,24 +145,46 @@ function formatearFecha(fechaString) {
     return fechaString; 
 }
 
+function obtenerVariablesGlobales() {
+    const costoFijoTotal = parseFloat(document.getElementById("costoFijoTotalInput").value) || 0;
+    const costoConsumoTotal = parseFloat(document.getElementById("costoConsumoTotalInput").value) || 0;
+    
+    const totalConsumoKwh = datosLectura.reduce((sum, d) => sum + (d.lecturaActual - d.lecturaAnterior), 0);
+    const numClientes = datosLectura.length;
+    
+    const costoFijoPorPersona = numClientes > 0 ? costoFijoTotal / numClientes : 0;
+    
+    const precioKwhUnitario = totalConsumoKwh > 0 ? costoConsumoTotal / totalConsumoKwh : 0;
 
-function obtenerTarifas() {
-    const tarifa = parseFloat(document.getElementById("tarifaInput").value) || 0;
-    const gastoFijo = parseFloat(document.getElementById("gastoFijoInput").value) || 0;
-    return { tarifa, gastoFijo };
+    return {
+        costoFijoTotal,
+        costoConsumoTotal,
+        totalConsumoKwh,
+        numClientes,
+        costoFijoPorPersona,
+        precioKwhUnitario 
+    };
 }
 
-function calcularMonto(consumo) {
-    const { tarifa, gastoFijo } = obtenerTarifas();
-    const subtotal = consumo * tarifa;
-    const totalPagar = subtotal + gastoFijo;
-    return { subtotal, totalPagar, tarifa, gastoFijo };
+function calcularMontoTotalCliente(consumoKwh) {
+    const variables = obtenerVariablesGlobales();
+    
+    const costoKwhConsumido = consumoKwh * variables.precioKwhUnitario; 
+    const totalPagar = costoKwhConsumido + variables.costoFijoPorPersona; 
+    
+    return { 
+        costoKwhConsumido: costoKwhConsumido,
+        costoFijoPorPersona: variables.costoFijoPorPersona,
+        totalPagar: totalPagar,
+        precioKwhUnitario: variables.precioKwhUnitario 
+    };
 }
 
 function crearOptionClientes() {
     const selectCliente = document.getElementById("clienteSelect");
     selectCliente.innerHTML = datosLectura.map(d => `<option value="${escapeHtml(d.nombre)}">${escapeHtml(d.nombre)}</option>`).join('');
 }
+
 
 function mostrarResultadoHtml(html) {
     const resultadoDiv = document.getElementById("resultado");
@@ -135,9 +194,13 @@ function mostrarResultadoHtml(html) {
 function cargarTabla() {
     const tablaBody = document.querySelector("#lecturasTable tbody");
     tablaBody.innerHTML = "";
+    
+    const variablesGlobales = obtenerVariablesGlobales();
+    
     datosLectura.forEach(cliente => {
         const consumoCalculado = cliente.lecturaActual - cliente.lecturaAnterior;
-        const { totalPagar } = calcularMonto(consumoCalculado);
+        
+        const montos = calcularMontoTotalCliente(consumoCalculado);
 
         const fila = document.createElement("tr");
         fila.innerHTML = `
@@ -146,19 +209,28 @@ function cargarTabla() {
             <td>${cliente.lecturaAnterior.toLocaleString('es-CL')}</td>
             <td>${cliente.lecturaActual.toLocaleString('es-CL')}</td>
             <td>${consumoCalculado.toLocaleString('es-CL')}</td>
-            <td>${totalPagar.toLocaleString('es-CL', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</td>
+            <td>$${montos.costoKwhConsumido.toLocaleString('es-CL', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</td>
+            <td>$${montos.costoFijoPorPersona.toLocaleString('es-CL', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</td>
+            <td>$${montos.totalPagar.toLocaleString('es-CL', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</td>
         `;
         tablaBody.appendChild(fila);
     });
-}
-
-window.recalcularTodo = function() {
-    cargarTabla(); 
+    
     mostrarResultadoHtml(`
-        <p style="text-align: center;">¡Tarifas aplicadas y tabla actualizada! Revise los Totales a Pagar.</p>
+        <p><strong>Variables de Distribución Global:</strong></p>
+        <p>Total Clientes: ${variablesGlobales.numClientes}</p>
+        <p>Suma Consumo Total (kWh): ${variablesGlobales.totalConsumoKwh.toLocaleString('es-CL')}</p>
+        <hr>
+        <p><strong>Costo Fijo por Persona:</strong> $${variablesGlobales.costoFijoPorPersona.toLocaleString('es-CL', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</p>
+        <p><strong>Precio por 1 kWh (Unitario):</strong> $${variablesGlobales.precioKwhUnitario.toFixed(4).toLocaleString('es-CL')}</p>
+        <hr>
+        <p style="font-weight: bold; color: green;">Tabla de Costos por Cliente Actualizada.</p>
     `);
 }
 
+window.recalcularTodo = function() {
+    cargarTabla();
+}
 
 window.calcularConsumo = function() {
     const nombreCliente = document.getElementById("clienteSelect").value;
@@ -190,32 +262,12 @@ window.calcularConsumo = function() {
         return;
     }
 
-    const consumo = nuevaLectura - lecturaMesAnterior;
-    const { subtotal, totalPagar, tarifa, gastoFijo } = calcularMonto(consumo);
-    
-    // Actualiza los datos en memoria para la próxima lectura
     cliente.fechaAnterior = fechaMesAnterior;
     cliente.fechaActual = fechaLectura; 
     cliente.lecturaAnterior = lecturaMesAnterior; 
     cliente.lecturaActual = nuevaLectura;         
     
-    // Recargar tabla visual
     cargarTabla();
-
-    mostrarResultadoHtml(`
-        <p><strong>Cálculo para ${escapeHtml(cliente.nombre)}:</strong></p>
-        <p>Fecha Lectura Anterior: ${formatearFecha(fechaMesAnterior)}</p>
-        <p>Fecha Lectura Actual: ${formatearFecha(fechaLectura)}</p>
-        <hr>
-        <p>Lectura Mes Anterior: ${lecturaMesAnterior.toLocaleString('es-CL')} kWh</p>
-        <p>Lectura Mes Actual: ${nuevaLectura.toLocaleString('es-CL')} kWh</p>
-        <p>Consumo de Energía: ${consumo.toLocaleString('es-CL')} kWh</p>
-        <hr>
-        <p>Costo por Consumo (${consumo.toLocaleString('es-CL')} kWh @ ${tarifa.toLocaleString('es-CL')}$/kWh): **$${subtotal.toLocaleString('es-CL', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}**</p>
-        <p>Gasto Fijo Mensual: **$${gastoFijo.toLocaleString('es-CL', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}**</p>
-        <hr>
-        <p style="font-size: 1.2em;"><strong>TOTAL A PAGAR: $${totalPagar.toLocaleString('es-CL', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</strong></p>
-    `);
 
     document.getElementById("lecturaInput").value = "";
 }
@@ -225,36 +277,27 @@ window.calcularConsumo = function() {
 // ===========================
 document.addEventListener('DOMContentLoaded', () => {
 
-    // 0) Asigna valores iniciales a los inputs de tarifa y fecha
-    const tarifaInput = document.getElementById("tarifaInput");
-    const gastoFijoInput = document.getElementById("gastoFijoInput");
+    const costoFijoTotalInput = document.getElementById("costoFijoTotalInput");
+    const costoConsumoTotalInput = document.getElementById("costoConsumoTotalInput");
     const fechaInput = document.getElementById("fechaInput");
 
-
-    if (tarifaInput && !tarifaInput.value) {
-        tarifaInput.value = TARIFA_UNITARIA_INICIAL;
+    if (costoFijoTotalInput && !costoFijoTotalInput.value) {
+        costoFijoTotalInput.value = 50000; 
     }
-    if (gastoFijoInput && !gastoFijoInput.value) {
-        gastoFijoInput.value = 2500; 
+    if (costoConsumoTotalInput && !costoConsumoTotalInput.value) {
+        costoConsumoTotalInput.value = 350000; 
     }
     if (fechaInput) {
         fechaInput.valueAsDate = new Date();
     }
+    
+    // **Admin Bypass** (Se salta el login y el límite de visitas)
+    if (esAdmin()) {
+        document.getElementById("login-container").style.display = 'none';
+        document.getElementById("app-container").style.display = 'block';
+        crearOptionClientes();
+        cargarTabla();
+    } 
+    // Si no es admin, la aplicación permanece oculta y el usuario debe hacer login.
 
-
-    // 1) Control de seguridad
-    if (!comprobarPassword()) {
-        document.body.innerHTML = `<main style="padding:30px;"><h2>Acceso denegado 🔒</h2><p>No se proporcionó la contraseña correcta.</p></main>`;
-        return;
-    }
-    const limite = comprobarLimiteVisitas();
-    if (!limite.permitido) {
-        document.body.innerHTML = `<main style="padding:30px;"><h2>Has alcanzado el límite de visitas este periodo 🔒</h2>
-        <p>Has usado ${limite.registro.veces} visitas en los últimos ${periodoDias} días. Vuelve cuando el periodo se reinicie.</p></main>`;
-        return;
-    }
-
-    // 2) Cargar UI y datos
-    crearOptionClientes();
-    cargarTabla();
 });

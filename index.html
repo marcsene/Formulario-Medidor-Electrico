@@ -9,58 +9,75 @@
 <body>
 
     <header>
-        <img src="Img/Logo.png" alt="Logo de Consumo Eléctrico" class="app-logo"> <h1>Registro de Lecturas Eléctricas</h1>
-        <p>Calculadora de Consumo con Costo Unitario y Gasto Fijo</p>
+        <img src="logo.png" alt="Logo de Consumo Eléctrico" class="app-logo"> 
+        <h1>Registro de Lecturas Eléctricas</h1>
+        <p>Cálculo de Costos con Distribución Proporcional de Consumo y Fijos</p>
     </header>
 
-    <main>
+    <div id="login-container" class="form-container" style="max-width: 400px; margin: 50px auto;">
+        <h2>🔐 Inicio de Sesión</h2>
+        <label for="usernameInput">Nombre Completo:</label>
+        <input type="text" id="usernameInput" placeholder="Ej: Ines Fuentes" required>
         
-        <h2>Configuración de Tarifas</h2>
-        <div class="form-container" id="config-tarifas">
-            <label for="tarifaInput">Consumo:</label> 
-            <input type="number" id="tarifaInput" value="180" min="0" step="any" oninput="recalcularTodo()">
-            
-            <label for="gastoFijoInput">Gasto Fijo Mensual ($):</label>
-            <input type="number" id="gastoFijoInput" value="2500" min="0" oninput="recalcularTodo()">
-            
-            <button onclick="recalcularTodo()">Aplicar Tarifas y Recalcular</button>
-        </div>
+        <label for="passwordInput">Contraseña (Nombre de Pila + Número):</label>
+        <input type="password" id="passwordInput" placeholder="Ej: Ines2025" required>
         
-        <h2>Ingreso y Cálculo de Consumo Mensual</h2>
-        
-        <div class="form-container">
-            <label for="clienteSelect">Seleccione Cliente:</label>
-            <select id="clienteSelect">
-            </select>
+        <button onclick="iniciarSesion()">Ingresar</button>
+        <p id="loginMessage" style="color: red; margin-top: 10px;"></p>
+    </div>
+
+    <div id="app-container" style="display: none;">
+        <main>
             
-            <label for="fechaInput">Fecha de Lectura Actual:</label>
-            <input type="date" id="fechaInput" required>
-
-            <label for="lecturaInput">Lectura Mes Actual (kWh):</label>
-            <input type="number" id="lecturaInput" placeholder="Ingrese Lectura Actual (kWh)" min="0" step="any">
+            <h2>Ingreso Manual de Costos Globales</h2>
+            <div class="form-container" id="config-tarifas">
+                <label for="costoFijoTotalInput">Costo Fijo Total a Repartir ($):</label> 
+                <input type="number" id="costoFijoTotalInput" value="50000" min="0" oninput="recalcularTodo()">
+                
+                <label for="costoConsumoTotalInput">Costo Consumo Total a Repartir ($):</label>
+                <input type="number" id="costoConsumoTotalInput" value="350000" min="0" oninput="recalcularTodo()">
+                
+                <button onclick="recalcularTodo()">Aplicar Costos Globales y Recalcular</button>
+            </div>
             
-            <button onclick="calcularConsumo()">Calcular Consumo</button>
-        </div>
+            <h2>Ingreso de Lectura por Cliente</h2>
+            
+            <div class="form-container">
+                <label for="clienteSelect">Seleccione Cliente:</label>
+                <select id="clienteSelect">
+                </select>
+                
+                <label for="fechaInput">Fecha de Lectura Actual:</label>
+                <input type="date" id="fechaInput" required>
 
-        <div id="resultado" class="resultado-calculo">
-        </div>
+                <label for="lecturaInput">Lectura Mes Actual (kWh):</label>
+                <input type="number" id="lecturaInput" placeholder="Ingrese Lectura Actual (kWh)" min="0" step="any">
+                
+                <button onclick="calcularConsumo()">Registrar y Calcular</button>
+            </div>
 
-        <h2>Base de Datos Actual</h2>
-        <table id="lecturasTable">
-            <thead>
-                <tr>
-                    <th>Cliente</th>
-                    <th>Fecha Lectura Anterior</th>
-                    <th>Lectura Mes Anterior (kWh)</th> 
-                    <th>Lectura Mes Actual (kWh)</th>
-                    <th>Consumo (kWh)</th>
-                    <th>Total a Pagar ($)</th>
-                </tr>
-            </thead>
-            <tbody>
-            </tbody>
-        </table>
-    </main>
+            <div id="resultado" class="resultado-calculo">
+            </div>
+
+            <h2>Detalle de Costos por Cliente</h2>
+            <table id="lecturasTable">
+                <thead>
+                    <tr>
+                        <th>Cliente</th>
+                        <th>Fecha Lectura Anterior</th>
+                        <th>Lectura Mes Anterior (kWh)</th> 
+                        <th>Lectura Mes Actual (kWh)</th>
+                        <th>Consumo (kWh)</th>
+                        <th>Costo Consumo ($)</th> 
+                        <th>Costo Fijo Repartido ($)</th> 
+                        <th>Total a Pagar ($)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </main>
+    </div>
 
     <script src="script.js"></script>
 </body>
