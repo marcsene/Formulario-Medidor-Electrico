@@ -1,148 +1,210 @@
+/* Base y Reset */
 body {
-    font-family: 'Arial', sans-serif;
-    background-color: #e6f7ff; 
+    font-family: Arial, sans-serif;
+    background-color: #f4f7f9;
     color: #333;
-    padding: 20px;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
 }
 
-header {
-    text-align: center;
+/* Contenedores de la App */
+#login-container {
+    width: 350px;
+}
+
+#app-container {
+    display: flex;
+    width: 95%;
+    max-width: 1200px;
+    height: 90vh;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+/* Sidebar (Panel Lateral) */
+#sidebar {
+    width: 200px;
+    background-color: #3b5998; /* Azul */
+    padding: 20px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: white;
+    box-sizing: border-box;
+    flex-shrink: 0; /* Evita que se encoja */
+}
+
+.sidebar-title {
     margin-bottom: 30px;
-    color: #004d66; 
+    font-size: 1.5em;
+    color: #ffd700; /* Dorado */
 }
 
-.app-logo { /* NUEVOS ESTILOS PARA EL LOGO */
-    max-width: 80px; /* Ajusta el tamaño según tu logo */
-    height: auto;
-    margin-bottom: 10px; /* Espacio debajo del logo */
-    vertical-align: middle; /* Alinea verticalmente */
+.side-btn, .logout-btn {
+    width: 80%;
+    padding: 10px;
+    margin: 5px 0;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1em;
+    cursor: pointer;
+    text-align: left;
+    transition: background-color 0.2s;
+    border-radius: 4px;
 }
 
-h1 {
-    color: #007bff; 
-    display: inline-block; /* Permite que h1 esté al lado del logo si lo deseas, aunque text-align: center lo centrará */
-    margin: 0; /* Elimina márgenes predeterminados */
+.side-btn:hover {
+    background-color: #4c70ba;
 }
 
-h2 {
-    border-bottom: 2px solid #ccc;
-    padding-bottom: 5px;
-    color: #004d66;
+.logout-btn {
+    margin-top: auto; /* Empuja el botón al final */
+    border-top: 1px solid #4c70ba;
+    padding-top: 15px;
+    text-align: center;
+}
+.logout-btn:hover {
+    background-color: #d9534f; /* Rojo */
 }
 
-table {
+/* Contenido Principal */
+#content {
+    flex-grow: 1;
+    padding: 30px;
+    overflow-y: auto;
+}
+
+.seccion {
+    display: none;
+}
+
+/* Formularios y Cajas */
+.form-container, .login-box, .crud-box {
+    background: #f9f9f9;
+    padding: 20px;
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="password"],
+input[type="date"],
+select {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+button {
+    background-color: #5cb85c; /* Verde */
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background-color 0.2s;
+}
+
+button:hover {
+    background-color: #4cae4c;
+}
+
+#loginMessage, #crud-mensaje {
+    margin-top: 15px;
+    font-weight: bold;
+    color: #d9534f;
+}
+
+/* Tablas */
+#lecturasTable {
     width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); 
-    background-color: white;
-    border-radius: 8px;
-    overflow: hidden; 
 }
 
-th, td {
-    border: 1px solid #cceeff; 
-    padding: 12px;
+#lecturasTable th, #lecturasTable td {
+    border: 1px solid #ddd;
+    padding: 8px;
     text-align: left;
 }
 
-th {
-    background-color: #0056b3; 
-    color: white;
+#lecturasTable th {
+    background-color: #f2f2f2;
+}
+
+.total-row {
     font-weight: bold;
+    background-color: #e0f7fa;
 }
 
-tr:nth-child(even) {
-    background-color: #f0f8ff; 
+/* CRUD Admin */
+.crud-row {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 15px;
 }
 
-tr:hover {
-    background-color: #b3e0ff;
+.crud-buttons button {
+    margin-right: 10px;
 }
 
-.form-container {
-    background-color: #ffffff;
-    padding: 25px;
-    border-radius: 10px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    margin-bottom: 30px;
-    border-left: 5px solid #ff4500; 
-    display: flex; 
-    flex-wrap: wrap;
-    gap: 15px; 
-    align-items: flex-end; 
+.btn-eliminar {
+    background-color: #d9534f;
+}
+.btn-eliminar:hover {
+    background-color: #c9302c;
 }
 
-.form-container label {
-    font-weight: bold;
-    color: #004d66;
-    display: block;
-    margin-bottom: 5px;
-    width: 100%;
+.btn-nuevo {
+    background-color: #337ab7;
+}
+.btn-nuevo:hover {
+    background-color: #286090;
 }
 
-.form-container input[type="number"], 
-.form-container input[type="date"], 
-.form-container select {
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    flex-grow: 1; 
-    min-width: 150px; 
-}
-
-#config-tarifas {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 15px;
-    align-items: center;
-}
-
-#config-tarifas label, #config-tarifas input {
-    width: 100%;
-}
-
-#config-tarifas button {
-    grid-column: 1 / -1; 
-}
-
-
-.form-container button {
-    background-color: #28a745; 
+/* =====================================================
+   Estilos Adicionales para PDF (Descarga)
+   ===================================================== */
+.btn-pdf-download {
+    background-color: #e74c3c; /* Rojo para destacar el PDF */
     color: white;
     border: none;
+    padding: 10px 15px;
+    margin-top: 10px; 
+    margin-bottom: 20px;
+    border-radius: 4px;
     cursor: pointer;
     font-weight: bold;
-    padding: 12px;
     transition: background-color 0.3s;
-    flex-grow: 1;
+    width: auto; /* Adaptado */
+    display: inline-block;
 }
 
-.form-container button:hover {
-    background-color: #1e7e34; 
+.btn-pdf-download:hover {
+    background-color: #c0392b;
 }
 
-.resultado-calculo {
-    padding: 20px;
-    background-color: #fffacd; 
-    border: 1px solid #ffc107;
-    color: #856404; 
-    border-radius: 8px;
-    margin-bottom: 20px;
-    font-weight: bold;
-}
-/* Estilo para la fila del Total General */
-.total-row td {
-    /* Fondo para destacar (similar al amarillo de tu Excel) */
-    background-color: #f7e69f !important; 
-    /* Borde superior para separarlo visualmente de la última fila de cliente */
-    border-top: 4px solid #333; 
-    /* Aumentar la fuente para que sea más legible */
-    font-weight: bold;
-}
-
-/* Estilo específico para el monto final del total (Total a Pagar) */
-.total-row td:last-child {
-    font-size: 1.1em;
-    color: #000;
+/* Ajuste de margen para la tabla, si es necesario */
+#seccion-tabla #lecturasTable {
+    margin-top: 15px; 
 }
