@@ -315,4 +315,15 @@ button:hover {
         width: 100%;
         margin-right: 0;
     }
+
+    /* ✅ CORRECCIÓN CRÍTICA DE LA TABLA PARA MÓVIL */
+    #lecturasTable th, #lecturasTable td {
+        font-size: 0.75em; /* Fuente más pequeña */
+        padding: 5px 3px; /* Relleno reducido */
+    }
+    
+    .btn-pdf-download {
+        font-size: 0.9em;
+        padding: 8px;
+    }
 }
