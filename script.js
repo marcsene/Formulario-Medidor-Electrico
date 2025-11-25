@@ -92,7 +92,7 @@ function comprobarLimiteVisitas() {
 }
 
 // -----------------------------------------------------------------------
-// FUNCIÓN BÁSICA DE NAVEGACIÓN (SE SOBREESCRIBE ABAJO PARA LÓGICA RESPONSIVE)
+// FUNCIÓN BÁSICA DE NAVEGACIÓN
 // -----------------------------------------------------------------------
 function mostrarSeccion(id) {
     document.querySelectorAll(".seccion").forEach(sec => sec.style.display = "none");
@@ -110,7 +110,7 @@ function setUsuarioActual(username) {
 // =====================================================
 
 // -------------------------
-// INICIAR SESIÓN
+// INICIAR SESIÓN (Corregida)
 // -------------------------
 window.iniciarSesion = function() {
     const usuario = document.getElementById("usernameInput").value.trim();
@@ -123,75 +123,67 @@ window.iniciarSesion = function() {
     // Ocultar botones de Admin por defecto
     document.querySelectorAll('.admin-only').forEach(btn => btn.style.display = 'none');
     
-    // Mostrar todos los botones por defecto (luego se ocultan para el cliente)
+    // Mostrar todos los botones por defecto 
     document.getElementById("btn-lecturas").style.display = "block";
     document.getElementById("btn-costos").style.display = "block";
     document.getElementById("btn-tabla").style.display = "block";
     document.getElementById("btn-pass").style.display = "block";
     document.getElementById("btn-admin").style.display = "block"; 
-    
-    // Ocultar botón de menú en el login (solo aparece en #app-container)
-    document.getElementById("menu-toggle").style.display = 'none';
+
+    let loginExitoso = false;
 
     // ==== ADMIN LOGIN ====
     if (rol === "admin" && usuario.toLowerCase() === ADMIN_USER.toLowerCase() && clave === ADMIN_PASSWORD) {
-        document.getElementById("login-container").style.display = "none";
-        document.getElementById("app-container").style.display = "flex";
         document.querySelectorAll('.admin-only').forEach(btn => btn.style.display = 'block');
-
         mostrarSeccion("seccion-lecturas"); 
         cargarOptionClientes();
         cargarTabla();
         cargarOptionsCrud();
-        
         setUsuarioActual(ADMIN_USER);
-        
-        return;
-    }
-
+        loginExitoso = true;
+    } 
+    
     // ==== CLIENTE LOGIN ====
-    const cliente = datosLectura.find(c => c.nombre.toLowerCase() === usuario.toLowerCase());
+    else {
+        const cliente = datosLectura.find(c => c.nombre.toLowerCase() === usuario.toLowerCase());
+        
+        if (cliente && rol === "cliente") {
+            const nombrePila = cliente.nombre.split(" ")[0];
+            const claveActualEsperada = cliente.passwordHash || (nombrePila + PASSWORD_SUFFIX);
 
-    if (!cliente) {
-        msg.textContent = "❌ El nombre no existe.";
-        return;
+            if (clave === claveActualEsperada) {
+                const limite = comprobarLimiteVisitas();
+                if (limite.permitido) {
+                    // Esconder botones innecesarios para el cliente
+                    document.getElementById("btn-lecturas").style.display = "none";
+                    document.getElementById("btn-costos").style.display = "none";
+                    document.getElementById("btn-admin").style.display = "none"; 
+                    
+                    mostrarSeccion("seccion-tabla");
+                    cargarTablaCliente(cliente.nombre);
+                    cargarOptionClientes();
+                    setUsuarioActual(cliente.nombre);
+                    loginExitoso = true;
+                } else {
+                    msg.textContent = `❌ Has alcanzado el límite de visitas (${maxVisitas}) por mes.`;
+                }
+            } else {
+                msg.textContent = "❌ Contraseña incorrecta para el rol de Cliente.";
+            }
+        } else if (rol === "admin") {
+            msg.textContent = "❌ Credenciales de Administrador incorrectas.";
+        } else {
+            msg.textContent = "❌ El nombre no existe.";
+        }
     }
-    
-    const nombrePila = cliente.nombre.split(" ")[0];
-    const claveActualEsperada = cliente.passwordHash || (nombrePila + PASSWORD_SUFFIX);
 
-    if (rol === "cliente" && clave !== claveActualEsperada) {
-        msg.textContent = "❌ Contraseña incorrecta para el rol de Cliente.";
-        return;
+    // Lógica final de cambio de interfaz si el login fue exitoso
+    if (loginExitoso) {
+        document.getElementById("login-container").style.display = "none";
+        document.getElementById("app-container").style.display = "flex";
+        // Mostrar el botón de menú para móvil
+        document.getElementById("menu-toggle").style.display = 'block';
     }
-
-    // Si intenta entrar como administrador y falla, o si el rol es incorrecto
-    if (rol === "admin") {
-        msg.textContent = "❌ Credenciales de Administrador incorrectas.";
-        return;
-    }
-    
-    // Límite de visitas
-    const limite = comprobarLimiteVisitas();
-    if (!limite.permitido) {
-        msg.textContent = `❌ Has alcanzado el límite de visitas (${maxVisitas}) por mes.`;
-        return;
-    }
-
-    // ACCESO DE CLIENTE
-    document.getElementById("login-container").style.display = "none";
-    document.getElementById("app-container").style.display = "flex";
-    
-    // ESCONDER BOTONES INNECESARIOS PARA EL CLIENTE
-    document.getElementById("btn-lecturas").style.display = "none";
-    document.getElementById("btn-costos").style.display = "none";
-    document.getElementById("btn-admin").style.display = "none"; 
-    
-    mostrarSeccion("seccion-tabla");
-    cargarTablaCliente(cliente.nombre); // Muestra solo su tabla
-    cargarOptionClientes();
-    
-    setUsuarioActual(cliente.nombre);
 }
 
 // -------------------------
@@ -611,7 +603,7 @@ window.cambiarPassword = function() {
 }
 
 // =====================================================
-// PARTE 6 — RESPONSIVE (MÓVIL) Y EVENT LISTENERS
+// PARTE 6 — RESPONSIVE (MÓVIL) Y EVENT LISTENERS (Corregida)
 // =====================================================
 
 // Se guarda la referencia original de mostrarSeccion
@@ -621,8 +613,8 @@ const originalMostrarSeccion = mostrarSeccion;
 mostrarSeccion = function(id) {
     const sidebar = document.getElementById('sidebar');
     
+    // Si la pantalla es pequeña y el sidebar está abierto, lo cerramos
     if (window.innerWidth <= 768 && sidebar && sidebar.classList.contains('open')) {
-        // Cierra el sidebar
         sidebar.classList.remove('open');
         // Espera la transición de CSS para mostrar la sección
         setTimeout(() => {
@@ -653,37 +645,36 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // --- ASIGNACIÓN DE EVENTOS A BOTONES DEL MENÚ ---
-    // Usamos esta forma para asegurar que los eventos se asignen correctamente
-    // sin depender de 'onclick' en el HTML, y usan la función 'mostrarSeccion' modificada.
+    // --- ASIGNACIÓN DE EVENTOS A BOTONES DEL MENÚ (Asegura la navegación) ---
     
-    document.getElementById("btn-lecturas").onclick = () => {
+    document.getElementById("btn-lecturas").addEventListener('click', () => {
         mostrarSeccion("seccion-lecturas"); 
-    };
+    });
 
-    document.getElementById("btn-tabla").onclick = () => {
+    document.getElementById("btn-tabla").addEventListener('click', () => {
         mostrarSeccion("seccion-tabla");
+        // Recargar la tabla según el rol al hacer clic en el botón
         if (usuarioActual === ADMIN_USER) {
             cargarTabla();
         } else if (usuarioActual) {
             cargarTablaCliente(usuarioActual);
         }
-    };
+    });
 
-    document.getElementById("btn-costos").onclick = () => {
+    document.getElementById("btn-costos").addEventListener('click', () => {
         mostrarSeccion("seccion-costos");
         document.getElementById("costoFijoTotal").value = costosGlobales.fijo;
         document.getElementById("costoConsumoTotal").value = costosGlobales.consumo;
-    };
+    });
 
-    document.getElementById("btn-pass").onclick = () => {
+    document.getElementById("btn-pass").addEventListener('click', () => {
         mostrarSeccion("seccion-pass");
         document.getElementById("passMessage").textContent = "";
-    };
+    });
 
-    document.getElementById("btn-admin").onclick = () => {
+    document.getElementById("btn-admin").addEventListener('click', () => {
         mostrarSeccion("seccion-admin");
         cargarOptionsCrud();
-    };
+    });
 
 });
