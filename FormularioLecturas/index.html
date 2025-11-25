@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control de Lecturas Eléctricas</title>
+    <link rel="stylesheet" href="styles.css">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+
+</head>
+<body>
+
+    <div id="login-container" class="form-container login-box">
+        <h2>🔐 San Ramon Mallarauco</h2>
+
+        <label>Rol:</label>
+        <select id="roleSelect">
+            <option value="cliente">Cliente</option>
+            <option value="admin">Administrador</option>
+        </select>
+        
+        <label>Nombre Completo (Ej: Juan Perez):</label>
+        <input type="text" id="usernameInput">
+
+        <label>Contraseña (Ej: Juan2025):</label>
+        <input type="password" id="passwordInput">
+
+        <button onclick="iniciarSesion()">Ingresar</button>
+
+        <p id="loginMessage"></p>
+    </div>
+
+    <div id="app-container" style="display:none;">
+        
+        <button id="menu-toggle">☰ Menú</button> 
+
+        <aside id="sidebar">
+            <h2 class="sidebar-title">⚡ Panel</h2>
+
+            <button class="side-btn" id="btn-lecturas">📥 Lecturas</button> 
+            <button class="side-btn" id="btn-tabla">📊 Tabla</button>
+            <button class="side-btn" id="btn-costos">💰 Costos</button>
+            <button class="side-btn" id="btn-pass">🔑 Contraseña</button>
+            <button class="side-btn admin-only" id="btn-admin">🛠 Admin</button>
+
+            <button id="logoutBtn" onclick="cerrarSesion()" class="logout-btn">⏻ Cerrar sesión</button>
+        </aside>
+
+        <main id="content">
+
+            <section id="seccion-lecturas" class="seccion oculto">
+                <h2>Ingreso de Lectura por Cliente</h2>
+
+                <div class="form-container">
+                    <label>Cliente:</label>
+                    <select id="clienteSelect"></select>
+
+                    <label>Fecha Actual:</label>
+                    <input type="date" id="fechaInput">
+
+                    <label>Lectura Actual (kWh):</label>
+                    <input type="number" id="lecturaInput">
+
+                    <button onclick="calcularConsumo()">Registrar y Calcular</button>
+                </div>
+
+                <div id="resultado" class="resultado-calculo"></div>
+            </section>
+
+            <section id="seccion-tabla" class="seccion oculto">
+                <h2>Detalle de Consumos y Costos</h2>
+                
+                <button onclick="descargarPDF()" class="btn-pdf-download">
+                    ⬇️ Descargar Tabla como PDF
+                </button>
+
+                <table id="lecturasTable">
+                    <thead>
+                        <tr>
+                            <th>Cliente</th>
+                            <th>Fecha</th>
+                            <th>Lectura Anterior</th>
+                            <th>Lectura Actual</th>
+                            <th>Consumo</th>
+                            <th>Costo Consumo</th>
+                            <th>Costo Fijo</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </section>
+
+            <section id="seccion-costos" class="seccion oculto">
+                <h2>Ingreso Manual de Costos Globales</h2>
+
+                <div class="form-container">
+                    <label>Costo Fijo Total ($):</label>
+                    <input type="number" id="costoFijoTotal" value="100000"> 
+
+                    <label>Costo Consumo Total ($):</label>
+                    <input type="number" id="costoConsumoTotal" value="50000">
+
+                    <button onclick="recalcularTodo()">Aplicar y Recalcular</button>
+                </div>
+            </section>
+
+            <section id="seccion-admin" class="seccion oculto">
+
+                <h2>🛠 Gestión de Clientes (Administrador)</h2>
+
+                <div class="crud-box">
+
+                    <div class="crud-row">
+                        <label>Seleccionar Cliente:</label>
+                        <select id="crud-select">
+                            <option value="">-- Seleccione Cliente --</option>
+                        </select>
+                    </div>
+
+                    <div class="crud-row">
+                        <label>Nombre Completo:</label>
+                        <input type="text" id="crud-nombre">
+                    </div>
+
+                    <div class="crud-row">
+                        <label>Parcela:</label>
+                        <input type="text" id="crud-parcela">
+                    </div>
+
+                    <div class="crud-row">
+                        <label>Lectura Actual (kWh):</label>
+                        <input type="number" id="crud-lectura">
+                    </div>
+
+                    <div class="crud-buttons">
+                        <button id="crud-guardar" class="btn-guardar">💾 Guardar Cambios</button>
+                        <button id="crud-eliminar" class="btn-eliminar">🗑 Eliminar</button>
+                        <button id="crud-crear" class="btn-nuevo">➕ Crear Nuevo Cliente</button>
+                    </div>
+
+                    <p id="crud-mensaje" class="crud-msg"></p>
+                </div>
+
+            </section>
+            
+            <section id="seccion-pass" class="seccion oculto">
+                <h2>🔑 Cambio de Contraseña</h2>
+
+                <div class="form-container">
+                    <label>Contraseña Actual:</label>
+                    <input type="password" id="passActualInput">
+
+                    <label>Nueva Contraseña:</label>
+                    <input type="password" id="passNuevaInput">
+
+                    <label>Confirma la Contraseña:</label>
+                    <input type="password" id="passConfirmaInput">
+
+                    <button onclick="cambiarPassword()">Actualizar Contraseña</button>
+                </div>
+                <p id="passMessage" class="crud-msg"></p>
+            </section>
+
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
