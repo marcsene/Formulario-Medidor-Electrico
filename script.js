@@ -181,8 +181,9 @@ window.iniciarSesion = function() {
     if (loginExitoso) {
         document.getElementById("login-container").style.display = "none";
         document.getElementById("app-container").style.display = "flex";
-        // Mostrar el botón de menú para móvil
-        document.getElementById("menu-toggle").style.display = 'block';
+        
+        // Mostrar el botón de menú para móvil (aunque el CSS lo oculta en PC, lo forzamos a 'block' para que el media query lo tome)
+        document.getElementById("menu-toggle").style.display = 'block'; 
     }
 }
 
@@ -609,17 +610,14 @@ window.cambiarPassword = function() {
 // Se guarda la referencia original de mostrarSeccion
 const originalMostrarSeccion = mostrarSeccion;
 
-// Se sobrescribe mostrarSeccion para manejar el cierre del menú en móvil
+// Se sobrescribe mostrarSeccion para manejar el cierre del menú en móvil (SIN SETTIMEOUT)
 mostrarSeccion = function(id) {
     const sidebar = document.getElementById('sidebar');
     
-    // Si la pantalla es pequeña y el sidebar está abierto, lo cerramos
+    // Si la pantalla es pequeña y el sidebar está abierto, lo cerramos y navegamos inmediatamente
     if (window.innerWidth <= 768 && sidebar && sidebar.classList.contains('open')) {
         sidebar.classList.remove('open');
-        // Espera la transición de CSS para mostrar la sección
-        setTimeout(() => {
-            originalMostrarSeccion(id);
-        }, 300); 
+        originalMostrarSeccion(id);
     } else {
         originalMostrarSeccion(id);
     }
@@ -645,7 +643,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // --- ASIGNACIÓN DE EVENTOS A BOTONES DEL MENÚ (Asegura la navegación) ---
+    // --- ASIGNACIÓN DE EVENTOS A BOTONES DEL MENÚ ---
     
     document.getElementById("btn-lecturas").addEventListener('click', () => {
         mostrarSeccion("seccion-lecturas"); 
@@ -676,5 +674,43 @@ document.addEventListener("DOMContentLoaded", () => {
         mostrarSeccion("seccion-admin");
         cargarOptionsCrud();
     });
+
+    // --- FUNCIONALIDAD DE DESCARGA PDF ---
+    window.descargarPDF = function() {
+        // Aseguramos que jspdf esté disponible
+        if (typeof window.jspdf === 'undefined' || typeof window.jspdf.jsPDF === 'undefined') {
+            alert("Error: Las librerías de PDF no se cargaron correctamente.");
+            return;
+        }
+
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('l', 'mm', 'a4'); // 'l' para horizontal
+
+        const table = document.getElementById('lecturasTable');
+        if (!table) return;
+
+        // Título
+        doc.setFontSize(18);
+        doc.text("Detalle de Consumos y Costos", 14, 20);
+
+        // Usar autoTable para generar la tabla
+        doc.autoTable({
+            html: '#lecturasTable',
+            startY: 25,
+            theme: 'striped',
+            headStyles: { fillColor: [59, 89, 152] }, // Azul
+            styles: { fontSize: 8, cellPadding: 2, lineWidth: 0.1, lineColor: 200 },
+            columnStyles: {
+                0: { cellWidth: 35 }, // Cliente
+                1: { cellWidth: 20 }, // Fecha
+                4: { cellWidth: 20 }, // Consumo
+                5: { cellWidth: 30 }, // Costo Consumo
+                6: { cellWidth: 30 }, // Costo Fijo
+                7: { cellWidth: 25 }  // Total
+            }
+        });
+
+        doc.save('Consumo_Lecturas.pdf');
+    }
 
 });

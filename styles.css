@@ -160,7 +160,7 @@ button:hover {
     background-color: #4cae4c;
 }
 
-#loginMessage, #crud-mensaje {
+#loginMessage, #crud-mensaje, #passMessage {
     margin-top: 15px;
     font-weight: bold;
     color: #d9534f;
