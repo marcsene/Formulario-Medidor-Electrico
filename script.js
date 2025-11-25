@@ -6,7 +6,7 @@
 const PASSWORD_SUFFIX = "2025";
 let ADMIN_USER = "Admin"; 
 let ADMIN_PASSWORD = "Admin" + PASSWORD_SUFFIX; 
-const maxVisitas = setInterval;
+const maxVisitas = 30; // Se asume un valor para maxVisitas
 const periodoDias = 30;
 const fechaInicial = "2025-10-30";
 const LOCAL_STORAGE_KEY = "lecturasData";
@@ -91,9 +91,9 @@ function comprobarLimiteVisitas() {
     return { permitido: true, registro };
 }
 
-// =====================================================
-// PARTE 1 — NAVEGACIÓN ENTRE SECCIONES
-// =====================================================
+// -----------------------------------------------------------------------
+// FUNCIÓN BÁSICA DE NAVEGACIÓN (SE SOBREESCRIBE ABAJO PARA LÓGICA RESPONSIVE)
+// -----------------------------------------------------------------------
 function mostrarSeccion(id) {
     document.querySelectorAll(".seccion").forEach(sec => sec.style.display = "none");
 
@@ -106,7 +106,7 @@ function setUsuarioActual(username) {
 }
 
 // =====================================================
-// PARTE 2 — LOGIN + PANEL + MENÚ
+// PARTE 2 — LOGIN + PANEL
 // =====================================================
 
 // -------------------------
@@ -129,6 +129,9 @@ window.iniciarSesion = function() {
     document.getElementById("btn-tabla").style.display = "block";
     document.getElementById("btn-pass").style.display = "block";
     document.getElementById("btn-admin").style.display = "block"; 
+    
+    // Ocultar botón de menú en el login (solo aparece en #app-container)
+    document.getElementById("menu-toggle").style.display = 'none';
 
     // ==== ADMIN LOGIN ====
     if (rol === "admin" && usuario.toLowerCase() === ADMIN_USER.toLowerCase() && clave === ADMIN_PASSWORD) {
@@ -146,7 +149,7 @@ window.iniciarSesion = function() {
         return;
     }
 
-    // ==== CLIENTE LOGIN (MODIFICADO) ====
+    // ==== CLIENTE LOGIN ====
     const cliente = datosLectura.find(c => c.nombre.toLowerCase() === usuario.toLowerCase());
 
     if (!cliente) {
@@ -178,7 +181,7 @@ window.iniciarSesion = function() {
     // ACCESO DE CLIENTE
     document.getElementById("login-container").style.display = "none";
     document.getElementById("app-container").style.display = "flex";
-
+    
     // ESCONDER BOTONES INNECESARIOS PARA EL CLIENTE
     document.getElementById("btn-lecturas").style.display = "none";
     document.getElementById("btn-costos").style.display = "none";
@@ -198,47 +201,6 @@ window.cerrarSesion = function() {
     window.location.reload(); 
 }
 
-// =====================================================
-// PANEL LATERAL - BOTONES DE MENU (AJUSTADO)
-// =====================================================
-document.getElementById("btn-lecturas").onclick = () => {
-    mostrarSeccion("seccion-lecturas"); 
-};
-
-document.getElementById("btn-tabla").onclick = () => {
-    mostrarSeccion("seccion-tabla");
-    // Lógica de seguridad para la tabla
-    if (usuarioActual === ADMIN_USER) {
-        cargarTabla(); // Carga la tabla completa para el Admin
-    } else if (usuarioActual) {
-        cargarTablaCliente(usuarioActual); // Carga solo la tabla del cliente logueado
-    }
-};
-
-document.getElementById("btn-costos").onclick = () => {
-    mostrarSeccion("seccion-costos");
-    document.getElementById("costoFijoTotal").value = costosGlobales.fijo;
-    document.getElementById("costoConsumoTotal").value = costosGlobales.consumo;
-};
-
-document.getElementById("btn-pass").onclick = () => {
-    mostrarSeccion("seccion-pass");
-    document.getElementById("passMessage").textContent = "";
-};
-
-document.getElementById("btn-admin").onclick = () => {
-    mostrarSeccion("seccion-admin");
-    cargarOptionsCrud();
-};
-
-// -------------------------
-// CARGA INICIAL
-// -------------------------
-document.addEventListener("DOMContentLoaded", () => {
-    cargarDatos();
-    document.getElementById("login-container").style.display = "block";
-    document.getElementById("app-container").style.display = "none";
-});
 // =====================================================
 // PARTE 3 — CÁLCULO + TABLAS + LECTURAS
 // =====================================================
@@ -374,16 +336,13 @@ function cargarTablaCliente(nombre) {
 
     const cli = datosLectura.find(c => c.nombre === nombre);
     if (!cli) {
-         tbody.innerHTML = `<tr><td colspan="8">Error: No se encontraron datos para el usuario ${nombre}.</td></tr>`;
-         return;
+           tbody.innerHTML = `<tr><td colspan="8">Error: No se encontraron datos para el usuario ${nombre}.</td></tr>`;
+           return;
     }
 
     const consumo = cli.lecturaActual - cli.lecturaAnterior;
     const m = calcularMontoCliente(consumo);
     
-    // NOTA: Se muestran los costos fijos y por consumo que se aplican a TODOS los clientes.
-    // Si se desea ocultar el detalle de costos, se puede modificar esta fila.
-
     const row = `
         <tr>
             <td>${cli.nombre}</td>
@@ -587,7 +546,7 @@ function crearNuevoCliente() {
     crudLectura.value = "";
 }
 
-
+// Asignación de eventos del CRUD
 if(crudSelect) crudSelect.onchange = cargarDatosCrud;
 if(crudBtnGuardar) crudBtnGuardar.onclick = guardarCrud;
 if(crudBtnEliminar) crudBtnEliminar.onclick = eliminarCrud;
@@ -621,159 +580,110 @@ window.cambiarPassword = function() {
             msg.textContent = "❌ Contraseña actual del Administrador incorrecta.";
             return;
         }
-        
+
         ADMIN_PASSWORD = passNueva;
-        localStorage.setItem(LOCAL_STORAGE_ADMIN_PASS_KEY, passNueva); 
-        
-        msg.textContent = "✔ Contraseña de administrador actualizada. Nueva clave: " + passNueva;
-    } 
-    
-    // --- LÓGICA PARA CLIENTE ---
-    else if (usuarioActual) {
-        const cliente = datosLectura.find(c => c.nombre === usuarioActual);
-
-        if (cliente) {
-            const nombrePila = cliente.nombre.split(" ")[0];
-            const claveActualEsperada = cliente.passwordHash || (nombrePila + PASSWORD_SUFFIX);
-
-            if (passActual !== claveActualEsperada) {
-                 msg.textContent = "❌ Contraseña actual del cliente incorrecta.";
-                return;
-            }
-
-            cliente.passwordHash = passNueva;
-            guardarDatos();
-            
-            msg.textContent = "✔ Contraseña de cliente actualizada correctamente.";
-        } else {
-            msg.textContent = "❌ Error: Usuario no encontrado.";
-            return;
-        }
-    } else {
-        msg.textContent = "❌ Error: Nadie ha iniciado sesión.";
+        localStorage.setItem(LOCAL_STORAGE_ADMIN_PASS_KEY, ADMIN_PASSWORD);
+        msg.textContent = "✅ Contraseña de Administrador actualizada. Por favor, reinicie la sesión.";
         return;
     }
+    
+    // --- LÓGICA PARA CLIENTE ---
+    const cliente = datosLectura.find(c => c.nombre === usuarioActual);
 
-    // Limpiar los campos
-    document.getElementById("passActualInput").value = "";
-    document.getElementById("passNuevaInput").value = "";
-    document.getElementById("passConfirmaInput").value = "";
+    if (!cliente) {
+        msg.textContent = "❌ Error: Usuario no encontrado.";
+        return;
+    }
+    
+    const nombrePila = cliente.nombre.split(" ")[0];
+    const claveActualEsperada = cliente.passwordHash || (nombrePila + PASSWORD_SUFFIX);
+
+    if (passActual !== claveActualEsperada) {
+        msg.textContent = "❌ Contraseña actual incorrecta.";
+        return;
+    }
+    
+    // Actualizar la contraseña del cliente
+    cliente.passwordHash = passNueva;
+    guardarDatos();
+    
+    msg.textContent = "✅ Contraseña actualizada correctamente. Por favor, reinicie la sesión.";
 }
 
 // =====================================================
-// PARTE 6 — DESCARGA EN PDF (NUEVO)
+// PARTE 6 — RESPONSIVE (MÓVIL) Y EVENT LISTENERS
 // =====================================================
 
-/**
- * 🟢 NUEVA FUNCIÓN: Descarga la tabla de lecturas como un archivo PDF.
- */
-window.descargarPDF = function() {
-    
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    const table = document.getElementById('lecturasTable');
-    const tbody = document.querySelector("#lecturasTable tbody");
+// Se guarda la referencia original de mostrarSeccion
+const originalMostrarSeccion = mostrarSeccion;
 
-    // 1. Verificación de datos
-    if (!table || !tbody || tbody.rows.length === 0) {
-        alert("No hay datos en la tabla para descargar. Realice un cálculo o inicie sesión.");
-        return;
+// Se sobrescribe mostrarSeccion para manejar el cierre del menú en móvil
+mostrarSeccion = function(id) {
+    const sidebar = document.getElementById('sidebar');
+    
+    if (window.innerWidth <= 768 && sidebar && sidebar.classList.contains('open')) {
+        // Cierra el sidebar
+        sidebar.classList.remove('open');
+        // Espera la transición de CSS para mostrar la sección
+        setTimeout(() => {
+            originalMostrarSeccion(id);
+        }, 300); 
+    } else {
+        originalMostrarSeccion(id);
+    }
+}
+
+
+// Asignar eventos una vez que el DOM esté completamente cargado
+document.addEventListener("DOMContentLoaded", () => {
+    // --- LÓGICA DE CARGA INICIAL ---
+    cargarDatos();
+    // Inicialmente ocultamos la app y mostramos el login
+    document.getElementById("login-container").style.display = "block";
+    document.getElementById("app-container").style.display = "none";
+    
+    // --- LÓGICA RESPONSIVE DE MENÚ ---
+    const menuToggle = document.getElementById('menu-toggle');
+    const sidebar = document.getElementById('sidebar');
+
+    if (menuToggle && sidebar) {
+        // Asignar el evento para abrir/cerrar el menú
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('open');
+        });
     }
 
-    // 2. Título y nombre de archivo
-    const date = new Date();
-    const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    // --- ASIGNACIÓN DE EVENTOS A BOTONES DEL MENÚ ---
+    // Usamos esta forma para asegurar que los eventos se asignen correctamente
+    // sin depender de 'onclick' en el HTML, y usan la función 'mostrarSeccion' modificada.
     
-    let titleText = "Reporte Mensual de Consumos y Costos";
-    let filename = `Reporte_Lecturas_${formattedDate}.pdf`;
-    
-    // Si es un cliente, personalizar el reporte
-    if (usuarioActual && usuarioActual !== ADMIN_USER) {
-        titleText = `Detalle de Consumo Eléctrico - ${usuarioActual}`;
-        filename = `Factura_${usuarioActual.replace(/ /g, '_')}_${formattedDate}.pdf`;
-    }
+    document.getElementById("btn-lecturas").onclick = () => {
+        mostrarSeccion("seccion-lecturas"); 
+    };
 
-    // 3. Obtener cabeceras y datos de la tabla (excluyendo la fila de totales si existe)
-    const head = Array.from(table.tHead.rows[0].cells).map(cell => cell.textContent);
-    
-    let bodyData = [];
-    
-    // Recorrer las filas del cuerpo
-    for (let i = 0; i < tbody.rows.length; i++) {
-        const row = tbody.rows[i];
-        
-        // Excluir la fila de totales si existe (la identificamos por la clase 'total-row')
-        if (!row.classList.contains('total-row')) {
-            const rowData = Array.from(row.cells).map(cell => cell.textContent);
-            bodyData.push(rowData);
+    document.getElementById("btn-tabla").onclick = () => {
+        mostrarSeccion("seccion-tabla");
+        if (usuarioActual === ADMIN_USER) {
+            cargarTabla();
+        } else if (usuarioActual) {
+            cargarTablaCliente(usuarioActual);
         }
-    }
-    
-    // 4. Agregar encabezados al PDF
-    doc.setFontSize(14);
-    doc.text(titleText, 14, 20);
-    doc.setFontSize(10);
-    doc.text(`Generado el: ${formattedDate}`, 14, 25);
+    };
 
-    // 5. Generar la tabla con autoTable
-    doc.autoTable({
-        head: [head],
-        body: bodyData,
-        startY: 30, 
-        theme: 'striped',
-        headStyles: { 
-            fillColor: [44, 62, 80], // Azul oscuro
-            fontStyle: 'bold'
-        },
-        styles: {
-            fontSize: 8,
-            cellPadding: 2,
-        },
-        columnStyles: {
-            // Alinear a la derecha las columnas de números (0-based index)
-            2: { halign: 'right' }, // Lectura Anterior
-            3: { halign: 'right' }, // Lectura Actual
-            4: { halign: 'right' }, // Consumo
-            5: { halign: 'right' }, // Costo Consumo
-            6: { halign: 'right' }, // Costo Fijo
-            7: { halign: 'right' }  // Total
-        }
-    });
+    document.getElementById("btn-costos").onclick = () => {
+        mostrarSeccion("seccion-costos");
+        document.getElementById("costoFijoTotal").value = costosGlobales.fijo;
+        document.getElementById("costoConsumoTotal").value = costosGlobales.consumo;
+    };
 
-    // 6. Agregar Totales (solo para el Admin)
-    if (usuarioActual === ADMIN_USER) {
-        const lastRow = tbody.querySelector('.total-row');
-        if (lastRow) {
-            // Obtener solo las celdas importantes de totales
-            const totalCells = Array.from(lastRow.cells).slice(-4).map(cell => cell.textContent);
-            
-            // Re-calcular la posición Y para agregar la fila de totales después de la tabla
-            const finalY = doc.lastAutoTable.finalY + 5; 
+    document.getElementById("btn-pass").onclick = () => {
+        mostrarSeccion("seccion-pass");
+        document.getElementById("passMessage").textContent = "";
+    };
 
-            doc.setFontSize(10);
-            doc.text("Resumen General de Costos:", 14, finalY + 5);
+    document.getElementById("btn-admin").onclick = () => {
+        mostrarSeccion("seccion-admin");
+        cargarOptionsCrud();
+    };
 
-            // Generar tabla de totales por separado para aplicar estilos distintos
-            doc.autoTable({
-                head: [['Total Consumo', 'Total Costo Consumo', 'Total Costo Fijo', 'TOTAL FACTURADO']],
-                body: [totalCells],
-                startY: finalY + 10,
-                theme: 'grid',
-                headStyles: { 
-                    fillColor: [192, 57, 43], // Rojo
-                    fontStyle: 'bold'
-                },
-                columnStyles: {
-                    // Alinear a la derecha los totales
-                    0: { halign: 'right' }, 
-                    1: { halign: 'right' }, 
-                    2: { halign: 'right' }, 
-                    3: { halign: 'right' }  
-                }
-            });
-        }
-    }
-
-    // 7. Descargar el PDF
-    doc.save(filename);
-};
+});

@@ -5,15 +5,13 @@ body {
     color: #333;
     margin: 0;
     padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
     min-height: 100vh;
 }
 
 /* Contenedores de la App */
 #login-container {
     width: 350px;
+    margin: 50px auto; /* Para centrar el login */
 }
 
 #app-container {
@@ -25,6 +23,7 @@ body {
     background-color: #fff;
     border-radius: 8px;
     overflow: hidden;
+    margin: 20px auto; /* Centrar la aplicación en pantalla grande */
 }
 
 /* Sidebar (Panel Lateral) */
@@ -37,7 +36,24 @@ body {
     align-items: center;
     color: white;
     box-sizing: border-box;
-    flex-shrink: 0; /* Evita que se encoja */
+    flex-shrink: 0; 
+    transition: transform 0.3s ease-in-out; 
+}
+
+/* Botón de Hamburguesa (Solo visible en móvil) */
+#menu-toggle {
+    display: none; 
+    position: absolute; 
+    top: 15px;
+    left: 15px;
+    z-index: 999; 
+    background-color: #3b5998;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1.2em;
 }
 
 .sidebar-title {
@@ -65,7 +81,7 @@ body {
 }
 
 .logout-btn {
-    margin-top: auto; /* Empuja el botón al final */
+    margin-top: auto; 
     border-top: 1px solid #4c70ba;
     padding-top: 15px;
     text-align: center;
@@ -79,6 +95,7 @@ body {
     flex-grow: 1;
     padding: 30px;
     overflow-y: auto;
+    transition: margin-left 0.3s ease-in-out;
 }
 
 .seccion {
@@ -87,17 +104,31 @@ body {
 
 /* Formularios y Cajas */
 .form-container, .login-box, .crud-box {
-    background: #f9f9f9;
-    padding: 20px;
-    border-radius: 6px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    background: #ffffff; /* Fondo blanco */
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Sombra más definida */
     margin-bottom: 20px;
 }
 
-label {
+/* --- ESTILO CORREGIDO PARA EL LOGIN DE PC --- */
+.login-box {
+    width: 350px;
+    max-width: 90%; 
+    margin: 100px auto; 
+    text-align: center; /* Centra el título */
+}
+
+.login-box h2 {
+    margin-bottom: 20px;
+    color: #3b5998;
+}
+
+.login-box label {
     display: block;
     margin-top: 10px;
     font-weight: bold;
+    text-align: left; /* Alinea etiquetas a la izquierda */
 }
 
 input[type="text"],
@@ -135,17 +166,26 @@ button:hover {
     color: #d9534f;
 }
 
-/* Tablas */
+/* Tablas - Se ajustan para móvil con scroll horizontal */
 #lecturasTable {
     width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
+    display: block; 
+    overflow-x: auto; 
+}
+
+#lecturasTable thead, #lecturasTable tbody {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
 }
 
 #lecturasTable th, #lecturasTable td {
     border: 1px solid #ddd;
     padding: 8px;
     text-align: left;
+    white-space: nowrap; 
 }
 
 #lecturasTable th {
@@ -166,6 +206,8 @@ button:hover {
 
 .crud-buttons button {
     margin-right: 10px;
+    margin-bottom: 10px; 
+    width: auto; 
 }
 
 .btn-eliminar {
@@ -182,11 +224,9 @@ button:hover {
     background-color: #286090;
 }
 
-/* =====================================================
-   Estilos Adicionales para PDF (Descarga)
-   ===================================================== */
+/* Estilos Adicionales para PDF (Descarga) */
 .btn-pdf-download {
-    background-color: #e74c3c; /* Rojo para destacar el PDF */
+    background-color: #e74c3c; 
     color: white;
     border: none;
     padding: 10px 15px;
@@ -196,15 +236,83 @@ button:hover {
     cursor: pointer;
     font-weight: bold;
     transition: background-color 0.3s;
-    width: auto; /* Adaptado */
-    display: inline-block;
+    width: 100%; 
+    display: block;
 }
 
 .btn-pdf-download:hover {
     background-color: #c0392b;
 }
 
-/* Ajuste de margen para la tabla, si es necesario */
-#seccion-tabla #lecturasTable {
-    margin-top: 15px; 
+/* =====================================================
+   MEDIA QUERY PARA MOVIL (MAX-WIDTH: 768PX) 📱
+   ===================================================== */
+@media (max-width: 768px) {
+    
+    #app-container {
+        width: 100%;
+        max-width: 100%;
+        min-height: 100vh;
+        box-shadow: none;
+        border-radius: 0;
+        margin: 0;
+        flex-direction: column; 
+    }
+
+    /* Login */
+    #login-container {
+        width: 90%;
+        margin: 50px auto; 
+    }
+    
+    /* Sidebar (Menú Lateral) */
+    #sidebar {
+        width: 250px; 
+        height: 100vh;
+        position: fixed;
+        z-index: 1000;
+        padding-top: 70px;
+        transform: translateX(-100%); 
+    }
+
+    #sidebar.open {
+        transform: translateX(0);
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5);
+    }
+    
+    .sidebar-title {
+        display: block; 
+    }
+    
+    .side-btn, .logout-btn {
+        width: 90%;
+        text-align: left;
+    }
+
+    /* Botón de Hamburguesa */
+    #menu-toggle {
+        display: block;
+        position: fixed;
+        top: 15px;
+        left: 15px;
+        z-index: 1001; 
+    }
+    
+    /* Contenido Principal */
+    #content {
+        padding: 15px; 
+        padding-top: 60px; 
+        overflow-y: auto; 
+    }
+    
+    /* CRUD Buttons - Apilados en móvil */
+    .crud-buttons {
+        display: flex;
+        flex-direction: column; 
+    }
+
+    .crud-buttons button {
+        width: 100%;
+        margin-right: 0;
+    }
 }
